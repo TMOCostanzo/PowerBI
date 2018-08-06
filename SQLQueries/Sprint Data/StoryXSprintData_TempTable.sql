@@ -1,3 +1,49 @@
+SELECT DISTINCT 
+		  S.sprint_id
+		, S.jira_sprint_dwkey
+		, 'Sprint Name' =
+		CASE 
+			WHEN CHARINDEX('backlog', sprint_name) >0
+				THEN 
+					'Backlog'
+				ELSE
+					sprint_name
+		END
+		, sprint_start_dt, sprint_complete_dt, sprint_end_dt, 'None' sprint_goal
+		, sprint_status = 
+		 CASE ISNULL( sprint_start_dt, 0) 
+			WHEN 0 THEN 
+				CASE WHEN CHARINDEX('backlog', sprint_name) >  0
+					THEN 
+						'Backlog'
+					ELSE 
+						'Future'
+					END 
+			ELSE 
+				CASE closed_indicator
+				WHEN 1 
+					THEN 'Closed'
+				ELSE
+					'Active'
+				END
+		END
+		, Current_year =
+		CASE ISNULL( sprint_start_dt, 0)
+			WHEN 0 
+				THEN 
+					'Yes'
+				ELSE CASE YEAR(sprint_start_dt)
+					WHEN YEAR(CURRENT_TIMESTAMP)
+						THEN
+							'Yes'
+						ELSE
+							'No'
+					END
+			END
+	INTO #TSprint 
+	FROM
+		dim_jira_sprint S
+
 SELECT  DISTINCT
 		  DJI.jira_issue_dwkey 'DW Unique Issue ID'
 		, DJI.source_jira_issue_id 'JIRA Unique Issue ID'
@@ -43,60 +89,16 @@ SELECT  DISTINCT
 		, DJP.jira_proj_key_cd
 		, DJI.issue_creation_dt
 
-FROM fact_jira_issue_sprint FJIS
+FROM #Tsprint DJS
+	INNER JOIN fact_jira_issue_sprint FJIS ON
+		FJIS.jira_sprint_dwkey = DJS.jira_sprint_dwkey
 	INNER JOIN  fact_jira_issue FJI ON
 		FJI.jira_issue_dwkey = FJIS.jira_issue_dwkey 
 	INNER JOIN dim_jira_proj DJP ON
 		FJI.jira_proj_dwkey = DJP.jira_proj_dwkey
 	INNER JOIN dim_jira_issue DJI ON
 		FJI.jira_issue_dwkey = DJI.jira_issue_dwkey
-	INNER JOIN (
-			SELECT S.sprint_id
-				, S.jira_sprint_dwkey
-				, 'Sprint Name' =
-					CASE 
-						WHEN CHARINDEX('backlog', sprint_name) >0
-					THEN 
-						'Backlog'
-					ELSE
-						sprint_name
-					END
-			, sprint_start_dt, sprint_complete_dt, sprint_end_dt
-			, sprint_status = 
-			 CASE ISNULL( sprint_start_dt, 0) 
-				WHEN 0 THEN 
-					CASE WHEN CHARINDEX('backlog', sprint_name) >  0
-						THEN 
-							'Backlog'
-						ELSE 
-							'Future'
-						END 
-				ELSE 
-					CASE closed_indicator
-					WHEN 1 
-						THEN 'Closed'
-					ELSE
-						'Active'
-					END
-			END
-			, Current_year =
-			CASE ISNULL( sprint_start_dt, 0)
-				WHEN 0 
-					THEN 
-						'Yes'
-					ELSE CASE YEAR(sprint_start_dt)
-						WHEN YEAR(CURRENT_TIMESTAMP)
-							THEN
-								'Yes'
-							ELSE
-								'No'
-						END
-				END
-			FROM dim_jira_sprint S
-	)  DJS
-	ON
-		FJIS.jira_sprint_dwkey = DJS.jira_sprint_dwkey
-
 WHERE DJP.jira_proj_key_cd in ('INFAOP', 'INFUOP', 'NAS', 'STOR', 'WI')
-	AND DJS.sprint_id <> 867
+	AND sprint_id <> 867
 
+DROP TABLE #Tsprint

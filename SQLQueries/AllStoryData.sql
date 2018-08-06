@@ -13,7 +13,12 @@ SELECT DISTINCT FJI.jira_issue_dwkey 'DW Unique Issue ID'
 		,label_desc 'Labels'
 		,Epic_Key 'Epic Key'
 		, DJI.resolution_dt 'Resolution Date'
-		,assignee_datawarehousekey  'Assignee'
+		, 'Assignee' = CASE assignee_datawarehousekey  
+			WHEN -9999 
+				THEN 'Unassigned'
+			ELSE
+				CAST (assignee_datawarehousekey as VARCHAR(10))
+			END
 		,FJI.jira_issue_status 'Status'
 		,InAnySprint = CASE ISNULL(FJIS.jira_issue_dwkey, 1) WHEN 1 THEN 'no' ELSE 'yes' END
 		,jira_issue_key_cd + '-' + summary CombinedSummary
