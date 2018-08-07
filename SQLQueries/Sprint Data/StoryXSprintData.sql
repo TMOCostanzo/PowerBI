@@ -6,7 +6,7 @@ SELECT  DISTINCT
 		, DJS.sprint_id 'Sprint ID'
 		, DJI.resolution_dt 'Resolution Date'
 		, FJI.jira_issue_status 'Status'
-		, DJS.[Sprint Name]
+		, DJS.Reset_Sprint_Name 'Sprint Name'
 		, DJS.sprint_start_dt 'Sprint Start Date'
 		, DJS.sprint_end_dt 'Sprint End Date'
 		, DJS.sprint_complete_dt 'Sprint Complete Date'
@@ -16,7 +16,7 @@ SELECT  DISTINCT
 			WHEN 'Blocked'
 				THEN 'Blocked'
 			ELSE CASE
-				WHEN DJI.resolution_dt > DJS.sprint_end_dt
+				WHEN DJI.resolution_dt > DJS.sprint_complete_dt
 					THEN 
 						'To Do'
 					ELSE
@@ -27,7 +27,7 @@ SELECT  DISTINCT
 			WHEN 'Blocked'
 				THEN 0
 			ELSE CASE
-				WHEN DJI.resolution_dt > DJS.sprint_end_dt
+				WHEN DJI.resolution_dt > DJS.sprint_complete_dt or ISNULL(dji.resolution_dt ,0) = 0
 					THEN 
 						0
 					ELSE
@@ -42,7 +42,14 @@ SELECT  DISTINCT
 			END 'Committed Points'
 		, DJP.jira_proj_key_cd
 		, DJI.issue_creation_dt
-
+		, 'Display JIRA Sprint' =
+			CASE	
+				CHARINDEX('_', djs.Reset_Sprint_Name) 
+				WHEN 0 
+					THEN djs.Reset_Sprint_Name
+				ELSE
+					RIGHT(djs.Reset_Sprint_Name, CHARINDEX('_', REVERSE(djs.Reset_Sprint_Name))-1)
+				END
 FROM fact_jira_issue_sprint FJIS
 	INNER JOIN  fact_jira_issue FJI ON
 		FJI.jira_issue_dwkey = FJIS.jira_issue_dwkey 
@@ -53,7 +60,7 @@ FROM fact_jira_issue_sprint FJIS
 	INNER JOIN (
 			SELECT S.sprint_id
 				, S.jira_sprint_dwkey
-				, 'Sprint Name' =
+				, Reset_Sprint_Name =
 					CASE 
 						WHEN CHARINDEX('backlog', sprint_name) >0
 					THEN 
@@ -99,4 +106,5 @@ FROM fact_jira_issue_sprint FJIS
 
 WHERE DJP.jira_proj_key_cd in ('INFAOP', 'INFUOP', 'NAS', 'STOR', 'WI')
 	AND DJS.sprint_id <> 867
+	AND DJI.jira_issue_key_cd = 'INFAOP-598'
 
