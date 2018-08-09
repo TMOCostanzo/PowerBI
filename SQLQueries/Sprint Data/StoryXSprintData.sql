@@ -50,6 +50,11 @@ SELECT  DISTINCT
 				ELSE
 					RIGHT(djs.Reset_Sprint_Name, CHARINDEX('_', REVERSE(djs.Reset_Sprint_Name))-1)
 				END
+		, 'Sprint Modification' = CASE 
+			WHEN issue_creation_dt between DJS.sprint_start_dt and DJS.sprint_end_dt
+			THEN 'Added'
+			ELSE ''
+			END
 FROM fact_jira_issue_sprint FJIS
 	INNER JOIN  fact_jira_issue FJI ON
 		FJI.jira_issue_dwkey = FJIS.jira_issue_dwkey 
@@ -87,11 +92,11 @@ FROM fact_jira_issue_sprint FJIS
 					END
 			END
 			, Current_year =
-			CASE ISNULL( sprint_start_dt, 0)
+			CASE ISNULL( sprint_end_dt, 0)
 				WHEN 0 
 					THEN 
 						'Yes'
-					ELSE CASE YEAR(sprint_start_dt)
+					ELSE CASE YEAR(sprint_end_dt)
 						WHEN YEAR(CURRENT_TIMESTAMP)
 							THEN
 								'Yes'
@@ -106,5 +111,4 @@ FROM fact_jira_issue_sprint FJIS
 
 WHERE DJP.jira_proj_key_cd in ('INFAOP', 'INFUOP', 'NAS', 'STOR', 'WI')
 	AND DJS.sprint_id <> 867
-	AND DJI.jira_issue_key_cd = 'INFAOP-598'
 
