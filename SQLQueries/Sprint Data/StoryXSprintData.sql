@@ -110,5 +110,6 @@ FROM fact_jira_issue_sprint FJIS
 		FJIS.jira_sprint_dwkey = DJS.jira_sprint_dwkey
 
 WHERE DJP.jira_proj_key_cd in ('INFAOP', 'INFUOP', 'NAS', 'STOR', 'WI')
+	AND fji.jira_issue_type_dwkey = 9
 	AND DJS.sprint_id <> 867
 

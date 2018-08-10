@@ -21,7 +21,6 @@ SELECT DISTINCT FJI.jira_issue_dwkey 'DW Unique Issue ID'
 		, jira_issue_key_cd + '-' + summary CombinedSummary
 		, Epic_Name
 		, DJI.resolution_short_desc
-		, version_name
 		, 'https://jira.t-mobile.com/rest/api/2/issue/' + CAST(FJI.source_jira_issue_id AS VARCHAR(10)) Rest_URL
 		, FJI.source_jira_issue_id 'JIRA Unique Issue ID'
 		, DIC_R.source_user_cd 'Reporter_NTID'
