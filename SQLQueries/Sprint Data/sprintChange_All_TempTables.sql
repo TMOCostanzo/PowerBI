@@ -2,8 +2,8 @@ DECLARE @sprintID  varchar(20)
 
 SET @sprintID = '1878'
 
-DROP TABLE #addition
-DROP TABLE #sprint_history
+--DROP TABLE #addition
+--DROP TABLE #sprint_history
 
 SELECT 
 CASE WHEN field_name = 'Sprint' THEN new_value_desc end as 'Sprint'
@@ -24,7 +24,7 @@ FROM fact_jira_issue_history (nolock) A
 LEFT OUTER JOIN fact_jira_issue_sprint (nolock) B on A.jira_issue_dwkey = B.jira_issue_dwkey
                                                                    LEFT OUTER JOIN dim_jira_sprint (nolock) C on B.source_sprint_id = C.sprint_id
                                                                    LEFT OUTER JOIN fact_jira_issue (nolock) D on A.jira_issue_dwkey = D.jira_issue_dwkey
-WHERE field_name in ('Sprint') and CASE WHEN field_name = 'Sprint' THEN new_value_desc end is not null
+--WHERE field_name in ('Sprint') and CASE WHEN field_name = 'Sprint' THEN new_value_desc end is not null
 order by a.source_created_dt asc
 
 SELECT sprint_name,jira_issue_dwkey
@@ -41,10 +41,7 @@ SELECT DISTINCT sprint_name, jira_issue_key_cd, jira_issue_dwkey, sprint_id
 	, old_value_id, new_value_id
 	, [Sprint Addition]
 	, source_created_dt, sprint_start_dt,sprint_start_dt,  sprint_start_dt, sprint_end_dt FROM #addition
-WHERE charindex('2017',sprint_name ) = 0 
-	and sprint_id = 1878
-	AND jira_issue_key_cd = 'INFAOP-445'
-	AND new_value_id like '%1878%'
+	WHERE sprint_id = @sprintID
 	ORDER BY jira_issue_key_cd
 
 DROP TABLE #addition

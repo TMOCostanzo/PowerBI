@@ -106,12 +106,14 @@ FROM
 				FROM  fact_jira_issue FJI
 						INNER JOIN dim_jira_issue DJI on DJI.jira_issue_dwkey = FJI.jira_issue_dwkey
 						INNER JOIN dim_jira_proj DJP on DJP.jira_proj_dwkey = FJI.jira_proj_dwkey
-						INNER JOIN fact_jira_issue_history (nolock) FJIH ON FJI.jira_issue_dwkey = FJIH.jira_issue_dwkey
-				-- Only are concerned with changes which occur once the item are in a sprint.
 						INNER JOIN fact_jira_issue_sprint (nolock) B on FJI.jira_issue_dwkey = B.jira_issue_dwkey
 						INNER JOIN dim_jira_sprint (nolock) DJS on B.source_sprint_id = DJS.sprint_id
-				-- Limit to specific projects and only items which are either not completed or completed as Done, all other reasons are exclusionary
-				WHERE jira_proj_key_cd  IN ('INFAOP','INFUOP') AND isnull(DJI.resolution_short_desc, 'Done') = 'Done'
+						INNER JOIN fact_jira_issue_history (nolock) FJIH ON FJI.jira_issue_dwkey = FJIH.jira_issue_dwkey
+				WHERE jira_proj_key_cd  IN ('INFAOP', 'INFUOP')
+				AND FJIH.field_name IN (	
+					'Blocked Reason', 'Description', 'Expected Unblocked Date', 'IssueType', 'Priority', 'Project', 'Rank', 'Sprint', 'Story Points', 'Summary'
+					)
+					AND DJP.jira_proj_key_cd IN ('INFAOP', 'INFUOP')
 			) Sprint_History
 		)	
 		UNION 
@@ -151,34 +153,26 @@ FROM
 						ON DJI.jira_issue_dwkey = FJIH.jira_issue_dwkey AND
 							FJIH.field_name = 'Sprint' AND
 							((FJIH.old_value_id IS NULL OR CHARINDEX(CAST(FJIS.source_sprint_id as varchar), FJIH.old_value_id ) =0) AND  CHaRINDEX(CAST(FJIS.source_sprint_id as varchar), FJIH.new_value_id) > 0 )
-					WHERE jira_proj_key_cd  IN ('INFAOP','INFUOP')
+					WHERE jira_proj_key_cd  IN ('INFAOP', 'INFUOP')
 						AND 
 							issue_creation_dt > sprint_start_dt
 						AND FJIH.jira_issue_dwkey IS NULL
 		) 
 	) JS
-LEFT JOIN 
+INNER JOIN 
 		nationaldw.[dbo].[dim_internal_contact] AD 
 			ON JS.changed_by = AD.source_user_cd
---			Where field_name = 'Blocked Reason'
---			and (created_dt > '2018-07-11' or source_created_dt_history > '2018-07-11')
-
 --where jira_issue_dwkey = 161384
---WHERE  (field_name = 'Sprint' AND Occurred_DuringSprint = 'TRUE' ) or field_name <> 'Sprint'
-	-- OR 
-	--(field_name = 'Sprint' )--AND Occurred_DuringSprint = 'TRUE')
 ORDER BY jira_issue_key_cd
 
 
 --SELECT * FROM #sprint_history where jira_issue_key_cd = 'INFUOP-1166'
 --SELECT * FROM #CreatedIntoSprint where jira_issue_key_cd = 'INFUOP-1166'
 --SELECT * FROM #sprint_history_decisions WHERE Issue_Creation_DuringSprint = 'TRUE'	
-SELECT * FROM #CheckIt 
-	--WHERE 
-	--sprint_id = @sprintID --and 
-	--jira_issue_key_cd = 'INFAOP-322'
+SELECT * FROM #CheckIt WHERE sprint_id = @sprintID --and 
+	--jira_issue_key_cd = 'INFUOP-1186'
 	--jira_issue_dwkey = 161384
- --WHERE Added_DuringSprint = 'TRUE' 
+ AND Added_DuringSprint = 'TRUE' 
  --and field_name LIKE 'Sprint%' --where jira_issue_key_cd = 'INFUOP-1166'-- field_name = 'Sprint' and Addition_DuringSprint = 'TRUE' 
 ORDER BY jira_issue_key_cd
 --WHERE field_name = 'Sprint' AND Occuring_DuringSprint = 'FALSE' and (old_value_id is null or CHARINDEX(CAST(sprint_id AS varchar), old_value_id) = 0) AND CHARINDEX(cast(sprint_id as Varchar), new_value_id) <> 0

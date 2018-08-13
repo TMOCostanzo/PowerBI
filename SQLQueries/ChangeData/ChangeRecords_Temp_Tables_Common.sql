@@ -19,13 +19,27 @@ SELECT 	FJI.jira_issue_dwkey
 	,  CAST(FJIH.old_value_desc as VARCHAR) old_value_desc2
 	,  CAST(FJIH.new_value_desc as VARCHAR) new_value_desc2
 	, FJIH.history_author changed_by
-into #sprint_history
+	, Current_year =
+		CASE YEAR(sprint_start_dt)
+			WHEN YEAR(CURRENT_TIMESTAMP)
+				THEN
+					'Yes'
+				ELSE
+					'No'
+			END
+	, jira_proj_key_cd
+INTO #sprint_history
 FROM  fact_jira_issue FJI
 		INNER JOIN dim_jira_issue DJI on DJI.jira_issue_dwkey = FJI.jira_issue_dwkey
 		INNER JOIN fact_jira_issue_sprint (nolock) B on FJI.jira_issue_dwkey = B.jira_issue_dwkey
+		INNER JOIN dim_jira_proj DJP on DJP.jira_proj_dwkey = FJI.jira_proj_dwkey
       INNER JOIN dim_jira_sprint (nolock) DJS on B.source_sprint_id = DJS.sprint_id
 		INNER JOIN fact_jira_issue_history (nolock) FJIH ON FJI.jira_issue_dwkey = FJIH.jira_issue_dwkey
-WHERE DJS.sprint_id = @sprintID 
+		-- In general, only certain issue types should trigger notification as things like assignee, reporter, time worked, etc. are not things we are worried about.
+		-- Can be modified, additionally there is a query which shows all. 
+		WHERE FJIH.field_name IN (	
+			'Blocked Reason', 'Description', 'Expected Unblocked Date', 'IssueType', 'Priority', 'Project', 'Rank', 'Sprint', 'Story Points', 'Summary'
+			)
 
 /*
 		Determine any issues which were created during the sprint.
@@ -46,16 +60,28 @@ SELECT sprint_name
 	, old_value_desc old_value_string
 	, DJS.sprint_name new_value_string
 	, DJI.issue_reporter changed_by
+	, Current_year =
+		CASE YEAR(sprint_start_dt)
+			WHEN YEAR(CURRENT_TIMESTAMP)
+				THEN
+					'Yes'
+				ELSE
+					'No'
+			END
+	, jira_proj_key_cd
 INTO #CreatedIntoSprint
 FROM Dim_jira_issue DJI
+	INNER JOIN fact_jira_issue FJI 
+		ON DJI.jira_issue_dwkey = FJI.jira_issue_dwkey
+	INNER JOIN dim_jira_proj DJP 
+		ON DJP.jira_proj_dwkey = FJI.jira_proj_dwkey
 	INNER JOIN fact_jira_issue_sprint FJIS on dji.jira_issue_dwkey = FJIS.jira_issue_dwkey
 	INNER JOIN dim_jira_sprint DJS on FJIS.source_sprint_id = DJS.sprint_id
 	LEFT OUTER JOIN fact_jira_issue_history FJIH 
 		ON DJI.jira_issue_dwkey = FJIH.jira_issue_dwkey AND
 			FJIH.field_name = 'Sprint' AND
-			(FJIH.old_value_id IS NULL AND FJIH.new_value_id =FJIS.source_sprint_id) 
-	WHERE FJIS.source_sprint_id = @sprintID
-		AND issue_creation_dt > sprint_start_dt
+			((FJIH.old_value_id IS NULL OR CHARINDEX(CAST(FJIS.source_sprint_id as varchar), FJIH.old_value_id ) =0) AND  CHaRINDEX(CAST(FJIS.source_sprint_id as varchar), FJIH.new_value_id) > 0 )
+	WHERE issue_creation_dt > sprint_start_dt
 		AND FJIH.jira_issue_dwkey IS NULL
 
 /*
@@ -105,11 +131,13 @@ SELECT sprint_name
 		, old_value_desc2 old_value_string
 		, new_value_desc2 new_value_string
 		, changed_by
+		, Current_year
+		, jira_proj_key_cd
 INTO #sprint_history_decisions
 FROM #sprint_history
 
 
-SELECT DISTINCT newID() history_ID, * -- sprint_name, sprint_id, jira_issue_dwkey, jira_issue_key_cd, field_name, Occuring_DuringSprint, Addition_DuringSprint, Issue_Creation_DuringSprint, old_value_id, new_value_id
+SELECT DISTINCT newID() history_ID, AD.full_name Who_Changed_FullName, JIRA_Changes.* -- sprint_name, sprint_id, jira_issue_dwkey, jira_issue_key_cd, field_name, Occuring_DuringSprint, Addition_DuringSprint, Issue_Creation_DuringSprint, old_value_id, new_value_id
 	INTO #CheckIt
 FROM
 	( 
@@ -128,6 +156,7 @@ FROM
 				, old_value_string
 				, new_value_string
 				, changed_by
+				, jira_proj_key_cd
 				FROM #sprint_history_decisions
 		)	
 		UNION 
@@ -138,7 +167,7 @@ FROM
 				, source_sprint_id
 				, NULL	old_value_id
 				, CAST(source_sprint_id AS VARCHAR) new_value_id
-				, 'SprintAAA' field_name
+				, 'Sprint' field_name
 				, source_created_dt_history
 				, issue_creation_dt
 				, 'TRUE' Occuring_DuringSprint
@@ -147,10 +176,15 @@ FROM
 				, old_value_string
 				, new_value_string
 				, changed_by
+				, jira_proj_key_cd
 			FROM #CreatedIntoSprint
 		) 
-	) JIRA_Changes
-WHERE sprint_id = @sprintID --And jira_issue_dwkey = 101602
+	)  JIRA_Changes
+INNER JOIN 
+		nationaldw.[dbo].[dim_internal_contact] AD 
+			ON JIRA_Changes.changed_by = AD.source_user_cd
+
+--WHERE sprint_id = @sprintID --And jira_issue_dwkey = 101602
 --	AND	(Addition_DuringSprint = 'TRUE'
 --	OR		field_name <> 'Sprint')
 /*	AND	( ( Issue_Creation_DuringSprint IS NOT NULL  AND Addition_DuringSprint IS NOT NULL)
@@ -172,7 +206,7 @@ WHERE sprint_id = @sprintID --And jira_issue_dwkey = 101602
 SELECT * FROM #sprint_history where jira_issue_key_cd = 'INFUOP-1166'
 SELECT * FROM #CreatedIntoSprint where jira_issue_key_cd = 'INFUOP-1166'
 SELECT * FROM #sprint_history_decisions WHERE Issue_Creation_DuringSprint = 'TRUE'	*/
-SELECT * FROM #CheckIt where field_name like 'Sprint%' and Occuring_DuringSprint = 'TRUE'  --where jira_issue_key_cd = 'INFUOP-1166'-- field_name = 'Sprint' and Addition_DuringSprint = 'TRUE' 
+SELECT * FROM #CheckIt where field_name like 'Sprint%' and Occuring_DuringSprint = 'TRUE' AND sprint_id = @sprintID  --where jira_issue_key_cd = 'INFUOP-1166'-- field_name = 'Sprint' and Addition_DuringSprint = 'TRUE' 
 ORDER BY jira_issue_key_cd
 --WHERE field_name = 'Sprint' AND Occuring_DuringSprint = 'FALSE' and (old_value_id is null or CHARINDEX(CAST(sprint_id AS varchar), old_value_id) = 0) AND CHARINDEX(cast(sprint_id as Varchar), new_value_id) <> 0
 
