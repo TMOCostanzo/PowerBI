@@ -46,7 +46,7 @@ FROM
 						END 
 					ELSE
 						'FALSE'
-					END Occurred_DuringSprint
+					END Occurred_During_Sprint
 				,  CASE WHEN field_name = 'Sprint'
 					THEN 
 						CASE WHEN source_created_dt_history between sprint_start_dt and sprint_end_dt 
