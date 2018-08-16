@@ -61,7 +61,8 @@ FROM fact_jira_issue FJI
 		ON EPIC.Story_DWK = DJI.jira_issue_dwkey
 
 	WHERE DJP.jira_proj_key_cd IN ( --'WI', 'NAS', 'STOR', 
-			'INFAOP', 'INFUOP')
-		AND FJI.jira_issue_type_dwkey = 9
+			'INFAOP', 'INFUOP', 'CF')
+		AND FJI.jira_issue_type_dwkey <> 2
       AND FJI.jira_issue_dwkey <> 135644
       AND FJI.jira_issue_dwkey <> -9999
+		and jira_issue_key_cd = 'CF-1048'

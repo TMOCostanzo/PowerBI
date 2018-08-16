@@ -15,4 +15,4 @@ FROM dim_jira_sprint DJIS
 	INNER JOIN dim_jira_issue DJI ON
 		FJI.jira_issue_dwkey = DJI.jira_issue_dwkey
 WHERE jira_proj_key_cd in ('INFAOP', 'INFUOP', 'NAS', 'STOR', 'WI')
-	AND fji.jira_issue_type_dwkey = 9
+	AND fji.jira_issue_type_dwkey  <> 2

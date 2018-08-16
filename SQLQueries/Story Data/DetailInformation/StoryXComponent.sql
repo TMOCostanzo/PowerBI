@@ -23,4 +23,4 @@ SELECT FJI.jira_issue_dwkey 'DW Unique Issue ID'
 		ON FJI.jira_issue_dwkey = COMP.jira_issue_dwkey
 	WHERE
 		DJP.jira_proj_key_cd IN ('WI', 'NAS', 'STOR', 'INFAOP', 'INFUOP')
-		AND FJI.jira_issue_type_dwkey = 9
+		AND FJI.jira_issue_type_dwkey <> 2

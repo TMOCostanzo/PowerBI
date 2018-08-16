@@ -94,6 +94,6 @@ FROM fact_jira_issue FJI
 
 	WHERE DJP.jira_proj_key_cd IN ( --'WI', 'NAS', 'STOR', 
 			'INFAOP', 'INFUOP')
-		AND FJI.jira_issue_type_dwkey = 9
+		AND FJI.jira_issue_type_dwkey <> 2
       AND FJI.jira_issue_dwkey <> 135644
       AND FJI.jira_issue_dwkey <> -9999

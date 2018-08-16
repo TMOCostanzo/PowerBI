@@ -57,7 +57,7 @@
 	ON 
 		SP.jira_issue_dwkey = FJI.jira_issue_dwkey			
 	WHERE DJP.jira_proj_key_cd IN ('WI', 'NAS', 'STOR', 'INFAOP', 'INFUOP')
-		and FJI.jira_issue_type_dwkey  = 9
+		and FJI.jira_issue_type_dwkey  <> 2
 		and (resolution_short_desc is null OR resolution_short_desc = 'Done')
 		and Current_year is null
 

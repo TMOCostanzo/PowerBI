@@ -2,6 +2,7 @@ SELECT  DISTINCT
 		  DJI.jira_issue_dwkey 'DW Unique Issue ID'
 		, DJI.source_jira_issue_id 'JIRA Unique Issue ID'
 		, DJI.jira_issue_key_cd 'Issue Key'
+		, DJI.summary 'Summary'
 		, DJI.story_points 'Story Points'
 		, DJS.sprint_id 'Sprint ID'
 		, DJI.resolution_dt 'Resolution Date'
@@ -110,6 +111,6 @@ FROM fact_jira_issue_sprint FJIS
 		FJIS.jira_sprint_dwkey = DJS.jira_sprint_dwkey
 
 WHERE DJP.jira_proj_key_cd in ('INFAOP', 'INFUOP', 'NAS', 'STOR', 'WI')
-	AND fji.jira_issue_type_dwkey = 9
+	AND fji.jira_issue_type_dwkey <> 2
 	AND DJS.sprint_id <> 867
 

@@ -7,6 +7,7 @@ FROM (
 		  FJI.jira_issue_dwkey
 		, DJS.jira_sprint_dwkey 
 		, DJI.story_points
+		, sprint_start_dt
 		, Current_year =
 		CASE YEAR(sprint_start_dt)
 			WHEN YEAR(CURRENT_TIMESTAMP)
@@ -25,7 +26,7 @@ FROM (
 		INNER JOIN dim_jira_proj DJP ON
 			FJI.jira_proj_dwkey = DJP.jira_proj_dwkey
 		WHERE DJP.jira_proj_key_cd IN ('WI', 'NAS', 'STOR', 'INFAOP', 'INFUOP')
-			AND fji.jira_issue_type_dwkey = 9
+			AND fji.jira_issue_type_dwkey  <> 2
 		) SprintCounts
 GROUP BY jira_issue_dwkey
 	, Current_year

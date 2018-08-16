@@ -28,7 +28,7 @@
 		INNER JOIN #Epic_View  EV
 			ON EV.Story_jira_issue_dwky = DJI.jira_issue_dwkey
 		WHERE DJP.jira_proj_key_cd = 'INFAOP'
-			AND fji.jira_issue_type_dwkey = 9
+			AND fji.jira_issue_type_dwkey <> 2
 
 	DROP TABLE #Epic_View
 		
