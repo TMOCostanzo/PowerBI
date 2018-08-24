@@ -29,8 +29,9 @@ FROM
 				, new_value_id
 				, field_name
 				, source_created_dt_history
+				, sprint_complete_dt
 				, issue_creation_dt
-				, CASE WHEN source_created_dt_history between sprint_start_dt and sprint_end_dt
+				, CASE WHEN source_created_dt_history between sprint_start_dt and ISNULL(sprint_complete_dt , sprint_end_dt)
 					THEN 
 						CASE WHEN field_name = 'Sprint'
 							THEN 
@@ -49,7 +50,7 @@ FROM
 					END Occurred_DuringSprint
 				,  CASE WHEN field_name = 'Sprint'
 					THEN 
-						CASE WHEN source_created_dt_history between sprint_start_dt and sprint_end_dt 
+						CASE WHEN source_created_dt_history between sprint_start_dt and ISNULL(sprint_complete_dt , sprint_end_dt)
 							THEN 
 								CASE WHEN 
 									(old_value_id is null OR CHARINDEX(CAST(sprint_id AS VARCHAR), old_value_id) = 0)				-- There isn't an original value OR the current sprint is not part of the source
@@ -62,7 +63,7 @@ FROM
 								END
 							END
 					END Added_DuringSprint  
-				,	CASE WHEN issue_creation_dt between sprint_start_dt and sprint_end_dt 
+				,	CASE WHEN issue_creation_dt between sprint_start_dt and ISNULL( sprint_complete_dt , sprint_end_dt)
 						THEN 'TRUE' 
 					END Issue_Created_DuringSprint
 				,	jira_proj_key_cd  
@@ -124,6 +125,7 @@ FROM
 					, CAST(FJIS.source_sprint_id AS VARCHAR) new_value_id
 					, 'Sprint' field_name
 					, issue_creation_dt source_created_dt_history
+					, sprint_complete_dt
 					, issue_creation_dt
 					, 'TRUE' Occurred_DuringSprint
 					, 'TRUE' Added_DuringSprint
@@ -174,12 +176,13 @@ ORDER BY jira_issue_key_cd
 --SELECT * FROM #CreatedIntoSprint where jira_issue_key_cd = 'INFUOP-1166'
 --SELECT * FROM #sprint_history_decisions WHERE Issue_Creation_DuringSprint = 'TRUE'	
 SELECT * FROM #CheckIt 
-	--WHERE 
+	WHERE 
 	--sprint_id = @sprintID --and 
-	--jira_issue_key_cd = 'INFAOP-322'
+	jira_issue_key_cd IN ('INFUOP-1216')
 	--jira_issue_dwkey = 161384
  --WHERE Added_DuringSprint = 'TRUE' 
- --and field_name LIKE 'Sprint%' --where jira_issue_key_cd = 'INFUOP-1166'-- field_name = 'Sprint' and Addition_DuringSprint = 'TRUE' 
+ and field_name LIKE 'Sprint%'
+ --and new_value_id = '1514' --where jira_issue_key_cd = 'INFUOP-1166'-- field_name = 'Sprint' and Addition_DuringSprint = 'TRUE' 
 ORDER BY jira_issue_key_cd
 --WHERE field_name = 'Sprint' AND Occuring_DuringSprint = 'FALSE' and (old_value_id is null or CHARINDEX(CAST(sprint_id AS varchar), old_value_id) = 0) AND CHARINDEX(cast(sprint_id as Varchar), new_value_id) <> 0
 
