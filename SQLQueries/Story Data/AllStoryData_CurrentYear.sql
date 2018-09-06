@@ -35,11 +35,11 @@ FROM fact_jira_issue FJI
 		ON DJIT.jira_issue_type_dwkey = FJI.jira_issue_type_dwkey
 	INNER JOIN (
 			SELECT DISTINCT FJIS.jira_issue_dwkey
-				, current_year =	CASE ISNULL( sprint_end_dt, 0)
+				, current_year =	CASE ISNULL( sprint_start_dt, 0)
 					WHEN 0 
 						THEN 
 							'Yes'
-						ELSE CASE YEAR(sprint_end_dt)
+						ELSE CASE YEAR(sprint_start_dt)
 							WHEN YEAR(CURRENT_TIMESTAMP)
 								THEN
 									'Yes'
@@ -97,3 +97,4 @@ FROM fact_jira_issue FJI
 		AND FJI.jira_issue_type_dwkey <> 2
       AND FJI.jira_issue_dwkey <> 135644
       AND FJI.jira_issue_dwkey <> -9999
+		AND CY.current_year = 'YES'
