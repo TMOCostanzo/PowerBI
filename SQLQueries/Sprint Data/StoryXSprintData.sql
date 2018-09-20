@@ -112,5 +112,7 @@ FROM fact_jira_issue_sprint FJIS
 
 WHERE DJP.jira_proj_key_cd in ('INFAOP', 'INFUOP', 'NAS', 'STOR', 'WI')
 	AND fji.jira_issue_type_dwkey <> 2
-	AND DJS.sprint_id <> 867
+	AND DJS.sprint_id = 2029
 
+
+	--select * from dim_jira_sprint where sprint_name = 'INFOP_2018-07-17'

@@ -17,7 +17,13 @@ SET @sprintID = 2079
 */
 
 
-SELECT DISTINCT newID() history_ID, jira_issue_dwkey 'DW Unique Issue ID', JS.*, AD.full_name Who_Changed_Full_Name
+SELECT DISTINCT newID() history_ID, JS.jira_issue_dwkey 'DW Unique Issue ID', JS.*, AD.full_name Who_Changed_Full_Name
+	,	CASE Added_DuringSprint 
+		WHEN 'True' THEN
+			DJI.story_points
+		ELSE
+			0
+		END AS Added_StoryPoints
 INTO #CheckIt
 FROM
 	( 
@@ -159,6 +165,8 @@ FROM
 						AND FJIH.jira_issue_dwkey IS NULL
 		) 
 	) JS
+INNER JOIN dim_jira_issue DJI
+	ON DJI.jira_issue_dwkey = JS.jira_issue_dwkey
 LEFT JOIN 
 		nationaldw.[dbo].[dim_internal_contact] AD 
 			ON JS.changed_by = AD.source_user_cd
@@ -183,7 +191,7 @@ SELECT * FROM #CheckIt
  --WHERE Added_DuringSprint = 'TRUE' 
 -- and 
  field_name LIKE 'Sprint%'
- and jira_issue_key_cd = 'INFUOP-1232'
+ --and jira_issue_key_cd = 'INFUOP-1232'
  and new_value_id like '%2079%'
  order by source_created_dt_history
 
