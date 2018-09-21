@@ -13,33 +13,43 @@ SELECT  DISTINCT
 		, DJS.sprint_complete_dt 'Sprint Complete Date'
 		, DJS.sprint_status 'Sprint Status'
 		, DJS.Current_year 'Current Year'
-		, CASE jira_issue_status 
-			WHEN 'Blocked'
-				THEN 'Blocked'
-			ELSE CASE
+		, CASE
 				WHEN DJI.resolution_dt > DJS.sprint_complete_dt
 					THEN 
 						'To Do'
 					ELSE
 						jira_issue_status
-				END 
 			END 'Reset Status'
-		, CASE jira_issue_status 
-			WHEN 'Blocked'
-				THEN 0
-			ELSE CASE
-				WHEN DJI.resolution_dt > DJS.sprint_complete_dt or ISNULL(dji.resolution_dt ,0) = 0
-					THEN 
-						0
+		, CASE ISNULL(DJI.Story_Points, -1) 
+				WHEN -1
+					THEN
+						dji.story_points
 					ELSE
-						DJI.story_points
-				END 
+						CASE jira_issue_status 
+							WHEN 'Blocked'
+								THEN 0
+							ELSE 
+								CASE
+									WHEN DJI.resolution_dt > DJS.sprint_complete_dt or ISNULL(dji.resolution_dt ,0) = 0
+										THEN 
+											0
+										ELSE
+											DJI.story_points
+								END
+						END 
 			END 'Sprint Completed Story Points'
 		, CASE jira_issue_status 
-			WHEN 'Blocked'
-				THEN 0
-			ELSE 
-				DJI.story_points 
+				WHEN 'Blocked'
+					THEN
+						CASE ISNULL(story_points,-1)
+							WHEN -1
+								THEN 
+									story_points
+								ELSE
+									0
+						END
+					ELSE 
+						DJI.story_points 
 			END 'Committed Points'
 		, DJP.jira_proj_key_cd
 		, DJI.issue_creation_dt
@@ -111,8 +121,6 @@ FROM fact_jira_issue_sprint FJIS
 		FJIS.jira_sprint_dwkey = DJS.jira_sprint_dwkey
 
 WHERE DJP.jira_proj_key_cd in ('INFAOP', 'INFUOP', 'NAS', 'STOR', 'WI')
-	AND fji.jira_issue_type_dwkey <> 2
-	AND DJS.sprint_id = 2029
+	AND fji.jira_issue_type_dwkey <> 2		-- No Epics
+	AND DJS.sprint_id <> 867					-- Skips a specific sprint.
 
-
-	--select * from dim_jira_sprint where sprint_name = 'INFOP_2018-07-17'
