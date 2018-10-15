@@ -65,4 +65,4 @@ FROM fact_jira_issue FJI
 		AND FJI.jira_issue_type_dwkey <> 2
       AND FJI.jira_issue_dwkey <> 135644
       AND FJI.jira_issue_dwkey <> -9999
-		and jira_issue_key_cd = 'CF-1048'
+		and jira_issue_key_cd = 'INFUOP-938'
