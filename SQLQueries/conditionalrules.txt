@@ -1,0 +1,123 @@
+= Table.AddColumn(#"Added Conditional Column", "Category", 
+each if Text.Contains([tt_description], "Call Home Event", Comparer.OrdinalIgnoreCase) then "Call Home" 
+
+else if Text.Contains([tt_description], "Host Down", Comparer.OrdinalIgnoreCase) then "Host Down" 
+
+else if Text.Contains([tt_description], "Comp_Memory_GT", Comparer.OrdinalIgnoreCase) then "Memory Threshold" 
+else if Text.Contains([tt_description], "Memory Swap Space Utilitization exceeds", Comparer.OrdinalIgnoreCase) then "Memory Threshold" 
+else if Text.Contains([tt_description], "Memory  Swap Space Utilitization exceeds", Comparer.OrdinalIgnoreCase) then "Memory Threshold" 
+else if Text.Contains([tt_description], "Memory  Swap Space Utilization", Comparer.OrdinalIgnoreCase) then "Memory Threshold" 
+else if Text.Contains([tt_description], "GBL_MEM_UTIL", Comparer.OrdinalIgnoreCase) then "Memory Threshold" 
+else if Text.Contains([tt_description], "OOM Exception", Comparer.OrdinalIgnoreCase) then "Memory Threshold" 
+else if Text.Contains([tt_description], "Memory Issues", Comparer.OrdinalIgnoreCase) then "Memory Threshold" 
+else if Text.Contains([tt_description], "Memory Swap Space", Comparer.OrdinalIgnoreCase) then "Memory Threshold" 
+else if Text.Contains([tt_description], "Memory Issues", Comparer.OrdinalIgnoreCase) then "Memory Threshold" 
+
+else if Text.Contains([tt_description], "Percentage of processses used", Comparer.OrdinalIgnoreCase) then "Process Threshold Exceeded" 
+
+else if Text.Contains([tt_description], "CPU_UTIL", Comparer.OrdinalIgnoreCase) then "CPU Threshold" 
+else if Text.Contains([tt_description], "UTIL_CPU", Comparer.OrdinalIgnoreCase) then "CPU Threshold" 
+else if Text.Contains([tt_description], "GBL_CPU_TOTAL_UTIL", Comparer.OrdinalIgnoreCase) then "CPU Threshold" 
+else if Text.Contains([tt_description], "CPU_high", Comparer.OrdinalIgnoreCase) then "CPU Threshold" 
+
+else if Text.Contains([tt_description], "Agent_Down", Comparer.OrdinalIgnoreCase) then "Agent Down" 
+else if Text.Contains([tt_description], "agent is stopped", Comparer.OrdinalIgnoreCase) then "Agent Down" 
+else if Text.Contains([tt_description], "agent_Lost_conn", Comparer.OrdinalIgnoreCase) then "Agent Down" 
+else if Text.Contains([tt_description], "agent down", Comparer.OrdinalIgnoreCase) then "Agent Down" 
+
+else if Text.Contains([tt_description], "Process Down", Comparer.OrdinalIgnoreCase) then "Process is not running" 
+else if Text.Contains([tt_description], "Process Is Down", Comparer.OrdinalIgnoreCase) then "Process is not running" 
+else if Text.Contains([tt_description], "not running", Comparer.OrdinalIgnoreCase) then "Process is not running" 
+else if Text.Contains([tt_description], "Oracle is down", Comparer.OrdinalIgnoreCase) then "Process is not running" 
+else if Text.Contains([tt_description], "Process Failed", Comparer.OrdinalIgnoreCase) then "Process is not running" 
+
+else if Text.Contains([tt_description], "fails to mount", Comparer.OrdinalIgnoreCase) then "Filesystem Failure" 
+else if (Text.Contains([tt_description], "unable to access", Comparer.OrdinalIgnoreCase) and Text.Contains([tt_description], "partition", Comparer.OrdinalIgnoreCase)) then "Filesystem Failure" 
+else if Text.Contains([tt_description], "issue with mount", Comparer.OrdinalIgnoreCase) then "Filesystem Failure" 
+else if Text.Contains([tt_description], "mount point missing", Comparer.OrdinalIgnoreCase) then "Filesystem Failure" 
+else if Text.Contains([tt_description], "filesystems are not available", Comparer.OrdinalIgnoreCase) then "Filesystem Failure" 
+
+else if (Text.Contains([tt_description], "add", Comparer.OrdinalIgnoreCase) and Text.Contains([tt_description], "space", Comparer.OrdinalIgnoreCase) and Text.Contains([tt_description], "mount point", Comparer.OrdinalIgnoreCase)) then "Add Resource: Filesystem"
+else if (Text.Contains([tt_description], "filesystem", Comparer.OrdinalIgnoreCase) and Text.Contains([tt_description], "space", Comparer.OrdinalIgnoreCase)) then "Add Resource: Filesystem"
+
+else if Text.Contains([tt_description], "install rpm", Comparer.OrdinalIgnoreCase) then "Install Request" 
+
+else if (Text.Contains([tt_description], "file", Comparer.OrdinalIgnoreCase) and Text.Contains([tt_description], "very large", Comparer.OrdinalIgnoreCase)) then "Filesystem Threshold" 
+else if Text.Contains([tt_description], "filesystem", Comparer.OrdinalIgnoreCase) then "Filesystem Threshold" 
+else if Text.Contains([tt_description], "space utilization", Comparer.OrdinalIgnoreCase) then "Filesystem Threshold" 
+else if Text.Contains([tt_description], "swap utilization", Comparer.OrdinalIgnoreCase) then "Filesystem Threshold" 
+else if Text.Contains([tt_description], "swap space", Comparer.OrdinalIgnoreCase) then "Filesystem Threshold" 
+
+else if Text.Contains([tt_description], "unable to log into", Comparer.OrdinalIgnoreCase) then "Access Request" 
+else if Text.Contains([tt_description], "access", Comparer.OrdinalIgnoreCase) then "Access Request" 
+
+else if Text.Contains([tt_description], "one or more paths", Comparer.OrdinalIgnoreCase) then "Filesystem Path Disabled"
+
+else if Text.Contains([tt_description], "Adapter_Failure", Comparer.OrdinalIgnoreCase) then "Adapter Failure" 
+else if Text.Contains([tt_description], "Adapter_Error", Comparer.OrdinalIgnoreCase) then "Adapter Failure" 
+
+else if Text.Contains([tt_description], "RunAway_process", Comparer.OrdinalIgnoreCase) then "Runaway Process" 
+
+else if Text.Contains([tt_description], "puppet service", Comparer.OrdinalIgnoreCase) then "Puppet Issue" 
+
+else if Text.Contains([tt_description], "Link_Error", Comparer.OrdinalIgnoreCase) then "Link Error" 
+else if Text.Contains([tt_description], "Link_Down", Comparer.OrdinalIgnoreCase) then "Link Error" 
+else if Text.Contains([tt_description], "Error Link Down", Comparer.OrdinalIgnoreCase) then "Link Error" 
+else if Text.Contains([tt_description], "link status definitely down", Comparer.OrdinalIgnoreCase) then "Link Error" 
+else if Text.Contains([tt_description], "link shows down", Comparer.OrdinalIgnoreCase) then "Link Error" 
+else if Text.Contains([tt_description], "link is down", Comparer.OrdinalIgnoreCase) then "Link Error" 
+
+else if Text.Contains([tt_description], "MultiPath_Failures", Comparer.OrdinalIgnoreCase) then "Multipath Failures" 
+
+else if Text.Contains([tt_description], "Patching_failed", Comparer.OrdinalIgnoreCase) then "Patch Failure" 
+
+else if Text.Contains([tt_description], "PageSpace_GE", Comparer.OrdinalIgnoreCase) then "PageSpace Threshold" 
+
+else if Text.Contains([tt_description], "Disk Utilization Exceeds", Comparer.OrdinalIgnoreCase) then "Capacity Threshold" 
+
+else if Text.Contains([tt_description], "Server Not Responding", Comparer.OrdinalIgnoreCase) then "Server Not Responding" 
+else if Text.Contains([tt_description], "Server Not Reachable", Comparer.OrdinalIgnoreCase) then "Server Not Responding" 
+
+else if Text.Contains([tt_description], "Please Reboot", Comparer.OrdinalIgnoreCase) then "Server Reboot" 
+
+else if Text.Contains([tt_description], "PageSpec_GE", Comparer.OrdinalIgnoreCase) then "PageSpace Threshold" 
+
+else if Text.Contains([tt_description], "violated for GOFERD", Comparer.OrdinalIgnoreCase) then "GOFERD Violation" 
+
+else if Text.Contains([tt_description], "Resource Faulted", Comparer.OrdinalIgnoreCase) then "Resource Faulted"
+else if Text.Contains([tt_description], "Resource Fault", Comparer.OrdinalIgnoreCase) then "Resource Faulted"
+else if Text.Contains([tt_description], "Resources Faulted", Comparer.OrdinalIgnoreCase) then "Resource Faulted"
+
+else if Text.Contains([tt_description], "Rebooted", Comparer.OrdinalIgnoreCase) then "Unexpected Reboot" 
+
+else if Text.Contains([tt_description], "Node Down", Comparer.OrdinalIgnoreCase) then "Node Down" 
+else if Text.Contains([tt_description], "Mbr_Down", Comparer.OrdinalIgnoreCase) then "Node Down" 
+
+else if Text.Contains([tt_description], "Limbo", Comparer.OrdinalIgnoreCase) then "Limbo"
+
+else if Text.Contains([tt_description], "Ping Check", Comparer.OrdinalIgnoreCase) then "Ping Failure"
+else if Text.Contains([tt_description], "unable to ping", Comparer.OrdinalIgnoreCase) then "Ping Failure"
+
+else if Text.Contains([tt_description], "Disk Failing", Comparer.OrdinalIgnoreCase) then "Disk Failure" 
+else if Text.Contains([tt_description], "disk failure", Comparer.OrdinalIgnoreCase) then "Disk Failure" 
+else if Text.Contains([tt_description], "Disk is offline", Comparer.OrdinalIgnoreCase) then "Disk Failure" 
+
+else if Text.Contains([tt_description], "Ethernet_DOWN", Comparer.OrdinalIgnoreCase) then "Ethernet Failure" 
+else if Text.Contains([tt_description], "ETHERCHANNEL_FAILURE", Comparer.OrdinalIgnoreCase) then "Ethernet Failure" 
+
+else if Text.Contains([tt_description], "LACP_Failure", Comparer.OrdinalIgnoreCase) then "LACP Failure" 
+
+else if Text.Contains([tt_description], "inode utilization", Comparer.OrdinalIgnoreCase) then "Node Utilization" 
+
+else if Text.Contains([tt_description], "Device_State_EQ_Stopped", Comparer.OrdinalIgnoreCase) then "Device Stopped" 
+
+else if Text.Contains([tt_description], "Vulnerabilities", Comparer.OrdinalIgnoreCase) then "Vulnerabilities" 
+
+else if Text.Contains([tt_description], "server has been powered off", Comparer.OrdinalIgnoreCase) then "Server Powered Down"
+ 
+else if Text.Contains([tt_description], "unable to login", Comparer.OrdinalIgnoreCase) then "Login Failure" 
+
+else if Text.Contains([tt_description], "puppet status", Comparer.OrdinalIgnoreCase) then "Puppet Issue" 
+
+else if Text.Contains([tt_description], "Software_Error", Comparer.OrdinalIgnoreCase) then "Software Error" 
+else "Other")
