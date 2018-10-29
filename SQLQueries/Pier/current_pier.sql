@@ -68,3 +68,5 @@ FROM BI_Semantics.rpt_tm.v_trouble_ticket tt WITH (nolock)
 WHERE grp.group_name IN ( 'EIT Inf Ops Support UNIX Tier 2' ) 
 		AND tt.created_date >= '1/1/2017' 
 		--and sym.Symptom_Desc = 'Degraded Service'
+
+		

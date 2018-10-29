@@ -44,7 +44,8 @@ select DISTINCT
 		ELSE DATEDIFF(mi, c.opened_at, c.closed_at)
 	END										TASK_Duration,
 	c.assigned_to,
-	b.made_sla								Made_SLA
+	b.made_sla								Made_SLA,
+	CONCAT('https://tmus.service-now.com/sc_request.do?sys_id=', a.sys_id) TicketURL
 INTO #SNOW
 FROM [ServiceNow_CMDB].[dbo].vw_sc_request a with (nolock) 
 	LEFT JOIN servicenow_cmdb.dbo.vw_sc_req_item b with (nolock) on reverse(left(reverse(b.request_link), charindex('/', reverse(b.request_link)) -1)) = a.sys_id
@@ -52,18 +53,20 @@ FROM [ServiceNow_CMDB].[dbo].vw_sc_request a with (nolock)
 	LEFT JOIN servicenow_cmdb.dbo.vw_sys_user d with (nolock) on d.manager = a.requested_for
 WHERE
 			CONVERT(DATETIME, a.opened_at,101) >= '1/1/' +  CAST(YEAR(CURRENT_TIMESTAMP) - 1 AS varchar)
-	AND	c.assignment_group in (
-		'EIT Inf Ops Support UNIX Tier2', 'EIT-Unix-Tier 2'
+	AND	--c.assignment_group in (
+		--'EIT Inf Ops Support UNIX Tier2', 'EIT-Unix-Tier 2'
 		--'EIT-Storage Tier', 'EIT-Storage-Tier2',
 		--'EIT Inf Ops Support Storage Tier 2',
 --		'EIT-NAS', 'ENG-SAN'
 		--'EIT Infra Storage', 'EIT Infra Storage Cap Add'
-		) 
-	and	(CHARINDEX('Close', c.state) = 0) and a.state in ('Open', 'In Progress')
+--		)  
+	a.number = 'REQ0264867'
+	--and	(CHARINDEX('Close', c.state) = 0) and a.state in ('Open', 'In Progress')
 	order by Request_ID
 
 select count(request_ID) from #snow
-
+select * from #snow
+select * from ServiceNow_CMDB..vw_sc_request where number = 'REQ0264867'
 /*select Round(DateDiff(day,Task_Opened_Date,CURRENT_TIMESTAMP),0) TaskAge, *
 FROM #SNOW
 where assigned_to= 'Mammar Rashid'

@@ -63,5 +63,8 @@ FROM fact_jira_issue FJI
 			WHERE source_custom_field_name_id = 11200
 		) InitLink
 		ON InitLink.jira_issue_dwkey = FJI.jira_issue_dwkey	
-		WHERE DJP.jira_proj_key_cd IN ('WI', 'NAS', 'STOR', 'INFAOP', 'INFUOP')
-		AND FJI.jira_issue_type_dwkey = 1
+		WHERE --DJP.jira_proj_key_cd IN ('WI', 'NAS', 'STOR', 'INFAOP', 'INFUOP')
+		DJP.jira_proj_key_cd IN ('CF')
+		AND DJIT.issue_type = 'Epic'
+		AND label_desc = 'PCF-SSH'
+		AND FJI.jira_issue_dwkey = 177637
