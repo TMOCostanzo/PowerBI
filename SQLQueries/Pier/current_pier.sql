@@ -3,28 +3,18 @@ SELECT 'PIER' Application,
 	CONVERT(VARCHAR(50), tt.tt_id)		Task_Number, 
 	grp.group_name								Assignee_Group, 
 	requested_by, 
-	''												manager, 
 	ad.fullname									Created_By, 
-	''												RIT_Opened_User, 
 	tt.created_date							Task_Created_Date, 
-	''												RIT_Opened_Date, 
-	''												RIT_Closed_Date, 
 	CASE 
 		WHEN tt.resolved_date IS NULL 
 			THEN tt.closed_date 
 			ELSE tt.resolved_date 
 	END											Task_Closed_Date, 
 	inc.element_id								Config_Item, 
-	''												stage,
-	''												approval, 
-	''												approval_history, 
-	-- VP value 
 	usr.full_name								Assignee, 
 	grp.group_name								Assignee_Group, 
-	''												number, 
 	tt.created_date							Task_Opened_Date, 
 	tt.tt_description, 
-	''												cmdb_ci, 
 	sym.Symptom_Desc							short_description, 
 	sts.status_desc, 
 	pri.priority_description, 
@@ -65,8 +55,8 @@ FROM BI_Semantics.rpt_tm.v_trouble_ticket tt WITH (nolock)
 			ON ad.loginname = tt.created_by 
 		LEFT OUTER JOIN BI_Semantics.adinfo.v_activedirectory_accounts ad2 WITH (nolock) 
 			ON ad2.loginname = tt.closed_by 
-WHERE grp.group_name IN ( 'EIT Inf Ops Support UNIX Tier 2' ) 
-		AND tt.created_date >= '1/1/2017' 
+WHERE --grp.group_name IN ( 'EIT Inf Ops Support UNIX Tier 2' ) 
+		--AND tt.created_date >= '1/1/2017' 
+		CONVERT(DATETIME, tt.created_date,101) >= '1/1/' +  CAST(YEAR(CURRENT_TIMESTAMP) - 1 AS varchar)
 		--and sym.Symptom_Desc = 'Degraded Service'
-
-		
+		--tt.TT_ID = '177270'
