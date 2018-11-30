@@ -23,7 +23,9 @@ LEFT JOIN (
 		FROM fact_jira_issue_component FJIC
 		INNER JOIN dim_jira_component DJC 
 		ON FJIC.jira_component_dwkey = DJC.jira_component_dwkey
+		WHERE FJIC.active_ind = 'Y'
 	) COMP
 	ON DJI_Init.jira_issue_dwkey = COMP.jira_issue_dwkey
 WHERE djit.issue_type = 'Epic'
 	AND djp.jira_proj_key_cd IN ('INFAOP', 'INFUOP',  'NAS', 'STOR')
+	AND DJI_Init.jira_issue_dwkey = 134782
