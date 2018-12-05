@@ -103,17 +103,24 @@ FROM fact_jira_issue_sprint FJIS
 					END
 			END
 			, Current_year =
-			CASE ISNULL( sprint_end_dt, 0)
-				WHEN 0 
-					THEN 
-						'Yes'
-					ELSE CASE YEAR(sprint_end_dt)
-						WHEN YEAR(CURRENT_TIMESTAMP)
+			CASE YEAR(sprint_start_dt)
+				WHEN YEAR(CURRENT_TIMESTAMP)
+					THEN
+						CASE WHEN 
+							sprint_start_dt > DATEADD(mm,-3,CURRENT_TIMESTAMP)
 							THEN
-								'Yes'
-							ELSE
-								'No'
-						END
+								'Last 3 Months'
+							ELSE 
+								CASE WHEN 
+									sprint_start_dt > DATEADD(mm,-6,CURRENT_TIMESTAMP)
+									THEN
+										'Last 6 Months'
+									ELSE 
+										'Over 6 Months'
+								END 
+							END
+					ELSE
+						'Not CY'
 				END
 			FROM dim_jira_sprint S
 	)  DJS

@@ -18,9 +18,21 @@ FROM (
 			CASE YEAR(sprint_start_dt)
 				WHEN YEAR(CURRENT_TIMESTAMP)
 					THEN
-						'Yes'
+						CASE WHEN 
+							sprint_start_dt > DATEADD(mm,-3,CURRENT_TIMESTAMP)
+							THEN
+								'Last 3 Months'
+							ELSE 
+								CASE WHEN 
+									sprint_start_dt > DATEADD(mm,-6,CURRENT_TIMESTAMP)
+									THEN
+										'Last 6 Months'
+									ELSE 
+										'Over 6 Months'
+								END 
+							END
 					ELSE
-						'No'
+						'Not CY'
 				END
 		FROM fact_jira_issue FJI
 			INNER JOIN dim_jira_issue DJI
