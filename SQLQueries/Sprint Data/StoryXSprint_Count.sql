@@ -6,6 +6,7 @@
 
 SELECT 	  jira_issue_dwkey 'DW Unique Issue ID'
 		, Current_year
+		, Rolling_Months
 		, story_points
 		, Count(jira_sprint_dwkey) 'Number of Sprints'  
 FROM (
@@ -18,22 +19,27 @@ FROM (
 			CASE YEAR(sprint_start_dt)
 				WHEN YEAR(CURRENT_TIMESTAMP)
 					THEN
-						CASE WHEN 
-							sprint_start_dt > DATEADD(mm,-3,CURRENT_TIMESTAMP)
-							THEN
-								'Last 3 Months'
-							ELSE 
-								CASE WHEN 
-									sprint_start_dt > DATEADD(mm,-6,CURRENT_TIMESTAMP)
-									THEN
-										'Last 6 Months'
-									ELSE 
-										'Over 6 Months'
-								END 
-							END
+						'Yes'
 					ELSE
-						'Not CY'
+						'No'
 				END
+		, Rolling_Months = 
+		CASE WHEN sprint_start_dt > DATEADD(mm,-3,CURRENT_TIMESTAMP)
+			THEN
+				'Last 3 Months'
+			ELSE 
+				CASE WHEN sprint_start_dt > DATEADD(mm,-6,CURRENT_TIMESTAMP)
+				THEN
+					'Last 6 Months'
+				ELSE 
+					CASE WHEN sprint_start_dt > DATEADD(mm,-12,CURRENT_TIMESTAMP)
+					THEN
+						'Last 12 Months'
+					ELSE
+						'All'
+					END
+				END
+			END
 		FROM fact_jira_issue FJI
 			INNER JOIN dim_jira_issue DJI
 				ON FJI.jira_issue_dwkey = DJI.jira_issue_dwkey
@@ -54,9 +60,7 @@ FROM (
 		) SprintCounts
 GROUP BY jira_issue_dwkey
 	, Current_year
+	, Rolling_Months
 	, story_points
-
-
-	select * from dim_jira_issue where jira_issue_dwkey = 101269
 
 	
