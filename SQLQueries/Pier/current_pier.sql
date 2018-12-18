@@ -17,6 +17,13 @@ SELECT 'PIER' Application,
 	tt.tt_description, 
 	sym.Symptom_Desc							short_description, 
 	sts.status_desc, 
+	CASE sts.Status_Desc
+		WHEN 'Assigned' THEN 'To Do'
+		WHEN 'Monitoring' THEN 'In Progress' --'Monitoring'
+		WHEN 'Working' THEN 'In Progress'
+		WHEN 'Waiting' THEN 'To Do'
+		ELSE 'Closed'
+	END											status_group,
 	pri.priority_description, 
 	tt.resolution_comments, 
 	ad2.fullname Closed_By, 
@@ -60,3 +67,6 @@ WHERE --grp.group_name IN ( 'EIT Inf Ops Support UNIX Tier 2' )
 		CONVERT(DATETIME, tt.created_date,101) >= '1/1/' +  CAST(YEAR(CURRENT_TIMESTAMP) - 1 AS varchar)
 		--and sym.Symptom_Desc = 'Degraded Service'
 		--tt.TT_ID = '177270'
+
+
+		
