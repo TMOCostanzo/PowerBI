@@ -10,11 +10,13 @@ select DISTINCT
 	req_item_task.assignment_group	Assignee_Group,
 	req_item_task.priority				Request_Priority,
 	req_item.cat_item,
+	req_item.description					RITM_Description,
 	request.requested_for,						
 	request.opened_by						Created_By,
 	request.opened_at						REQ_Created_Date,
 	request.closed_at 					REQ_Closed_Date,
-	req_item_task.description			REQ_Description, 
+	request.description					REQ_Description, 
+	null										REQ_SLA,
 	req_item.number 						RITM_number,
 	CASE CHARINDEX('Skipped', req_item_task.state)
 		WHEN 0
@@ -26,16 +28,14 @@ select DISTINCT
 				END
 		ELSE 'Closed Skipped'
 	END										RITM_State,
-	req_item.opened_at					RIT_Opened_Date,
-	req_item.closed_at					RIT_Closed_Date,
-	req_item_task.state					Source_State,
+	req_item.opened_at					RITM_Opened_Date,
+	req_item.closed_at					RITM_Closed_Date,
 	CASE CHARINDEX('Closed', req_item_task.state)
 		WHEN 0 
-		THEN req_item_task.state
+		THEN req_item.state
 		ELSE SUBSTRING(req_item_task.state, CHARINDEX(  ' ', req_item_task.state)+1, 30)
-	END										status_desc,
+	END										RITM_status_desc,
 	req_item_task.closed_by,
-	null										SLA,
 	CASE WHEN charIndex('Close', req_item.state) = 0 -- Get the duration of the tasks, should equal the entire ticket open/close but 
 												-- each task could be a different team
 		THEN	CASE WHEN charindex('Close', request.state) = 0 
@@ -43,7 +43,8 @@ select DISTINCT
 				ELSE DATEDIFF(mi, req_item.opened_at, request.closed_at)
 				END 
 		ELSE	DATEDIFF(mi, req_item.opened_at,req_item.closed_at) 
-	END										RTIM_Duration,
+	END														RTIM_Duration,
+	req_item.made_sla										RITM_Made_SLA,
 	req_item_task.number									Task_Number,
 	req_item_task.opened_at 							Task_Opened_Date,
 	req_item_task.closed_at 							Task_Closed_Date,
@@ -51,24 +52,23 @@ select DISTINCT
 		WHEN 0
 		THEN null
 		ELSE DATEDIFF(mi, req_item_task.opened_at, req_item_task.closed_at)
-	END										TASK_Duration,
-	req_item_task.assigned_to,
-	req_item.made_sla								Made_SLA,
-	CASE charIndex('Close', request.state)
+	END														Task_Duration,
+	req_item_task.assigned_to							Task_Assignee,
+	CASE charIndex('Close', request.state)								-- If the Request is closed, assign the task status to closed
 		WHEN 0
 			THEN
-				CASE charIndex('Close', req_item.state)
+				CASE charIndex('Close', req_item.state)				--	If the RITM is closed, assign the task status to closed
 				WHEN 0
 					THEN 
-						CASE charIndex('Close', req_item_task.state)
+						CASE charIndex('Close', req_item_task.state)	-- If the Task is closed in any way, assign the task status to closed
 						WHEN 0
 							THEN CONCAT('*', req_item_task.state, '*')
-							ELSE 'Closed'
+							ELSE 'Closed'							
 						END
 					ELSE 'Closed'
 				END
 			ELSE 'Closed'
-		END												Task_Status,
+		END														Task_Status,
 	CONCAT('https://tmus.service-now.com/sc_request.do?sys_id=', request.sys_id) TicketURL
 INTO #SNOW
 FROM [ServiceNow_CMDB].[dbo].vw_sc_request request with (nolock) 
@@ -78,17 +78,19 @@ FROM [ServiceNow_CMDB].[dbo].vw_sc_request request with (nolock)
 WHERE
 			CONVERT(DATETIME, request.opened_at,101) >= '1/1/' +  CAST(YEAR(CURRENT_TIMESTAMP) - 1 AS varchar)
 	AND	req_item_task.assignment_group in (
-		  'EIT Inf Ops Support UNIX Tier2'
-		, 'EIT-Unix-Tier 2'
-		, 'EIT-Storage Tier'
-		, 'EIT-Storage-Tier2'
-		, 'EIT Inf Ops Support Storage Tier 2'
-		, 'EIT-NAS'
-		, 'ENG-SAN'
-		, 'EIT Infra Storage'
-		, 'EIT Infra Storage Cap Add'
+--		  'EIT Inf Ops Support UNIX Tier2' 
+		  'EIT-Unix-Tier 2'
+--		, 'EIT-Storage Tier'
+--		, 'EIT-Storage-Tier2'
+--		, 'EIT Inf Ops Support Storage Tier 2'
+--		, 'EIT-NAS'
+--		, 'ENG-SAN'
+--		, 'EIT Infra Storage'
+--		, 'EIT Infra Storage Cap Add'
 		)  
-	--a.number = 'REQ0264867'
+	AND 
+		req_item_task.state <> 'Closed'
+--		request.number = 'REQ0124061'
 	--and	(CHARINDEX('Close', req_item_task.state) = 0) and a.state in ('Open', 'In Progress')
 	order by Request_ID
 
@@ -134,4 +136,15 @@ select * FROM [ServiceNow_CMDB].[dbo].vw_sc_req_item where number = 'RITM0350365
 select COUNT(RITM_STATE)
 FROM #SNow
 
+SELECT * INTO #Snow2
+FROM #SNOW
+WHERE task_status <> 'Closed'
 
+select task_number, count(task_number) FROM #SNOW2
+GROUp BY Task_Number
+HAVING COUNT(Task_Number) > 1
+
+DROP TABLE #Snow2
+
+
+--Order By task_opened_date
