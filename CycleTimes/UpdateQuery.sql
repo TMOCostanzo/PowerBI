@@ -1,0 +1,29 @@
+BEGIN TRANSACTION
+
+BEGIN TRY
+	select *, 'First' FROM CycleData 
+	WHERE dwKey IN (SELECT dwKey from UPDATEData)
+	ORDER BY ID
+
+	DELETE FROM CycleData 
+	WHERE dwKey IN (SELECT dwKey from UPDATEData)
+
+	INSERT INTO CycleData (dwkey, issue_create_month, issuestate, Time_hr )
+	SELECT dwkey, issue_Create_month, issuestate, Time_hr 
+	FROM  UpdateData
+
+	select *, 'Second' FROM CycleData 
+	WHERE dwKey IN (SELECT dwKey from UPDATEData)
+
+	DELETE FROM UpdateData
+
+	COMMIT TRANSACTIOn
+
+END TRY
+
+BEGIN CATCH
+
+	SELECT ERROR_MESSAGE()
+	ROLLBACK TRANSACTION
+
+END CATCH

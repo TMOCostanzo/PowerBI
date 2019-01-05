@@ -16,7 +16,7 @@ namespace PullCycleTimes
       {
          Application.EnableVisualStyles();
          Application.SetCompatibleTextRenderingDefault(false);
-         Application.Run(new LookupHistory());
+         Application.Run(new HistoryLookup());
       }
    }
 }

@@ -3,18 +3,26 @@
 	Ignores Epics and sub-tasks
 	Only includes COMPLETED sprints
 */
-
 SELECT 	  jira_issue_dwkey 'DW Unique Issue ID'
 		, Current_year
 		, Rolling_Months
 		, story_points
 		, Count(jira_sprint_dwkey) 'Number of Sprints'  
+		, MIN(sprint_start_dt) 'Earliest Sprint'  
+		, MAX(sprint_end_dt) 'Latest Sprint'  
 FROM (
 		SELECT DISTINCT
 			  FJI.jira_issue_dwkey
 			, DJS.jira_sprint_dwkey 
 			, DJI.story_points
 			, sprint_start_dt
+			, sprint_end_dt = 
+				CASE WHEN ABS(datediff("dd", DJS.sprint_end_dt, DJS.sprint_complete_dt)) > 2
+					THEN 
+						DJS.sprint_complete_dt
+					ELSE
+						DJS.Sprint_end_dt
+				END
 			, Current_year =
 			CASE YEAR(sprint_start_dt)
 				WHEN YEAR(CURRENT_TIMESTAMP)
@@ -62,5 +70,3 @@ GROUP BY jira_issue_dwkey
 	, Current_year
 	, Rolling_Months
 	, story_points
-
-	
