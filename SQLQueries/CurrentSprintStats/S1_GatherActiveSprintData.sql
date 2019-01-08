@@ -10,6 +10,7 @@ SELECT
 		,jira_proj_key_cd
 		,label_desc
 		,FJI.jira_issue_status
+		, DJI.priority_desc
 FROM [JIRA_Datamart].[dbo].[dim_jira_sprint] DJS
 INNER JOIN fact_jira_issue_sprint FJIS
 	ON FJIS.jira_sprint_dwkey = DJS.jira_sprint_dwkey

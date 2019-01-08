@@ -25,6 +25,7 @@ SELECT DISTINCT FJI.jira_issue_dwkey 'DW Unique Issue ID'
 		, FJI.source_jira_issue_id 'JIRA Unique Issue ID'
 		, DIC_R.source_user_cd 'Reporter_NTID'
 		, DIC_A.source_user_cd 'Assignee_NTID'
+		, DJI.priority_desc
 
 FROM fact_jira_issue FJI
 	INNER JOIN dim_jira_issue DJI ON

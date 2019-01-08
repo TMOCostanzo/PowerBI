@@ -44,6 +44,20 @@ namespace PullCycleTimes
    {
       private int totalTime = 0; // Time in Minutes
       private string issueState = string.Empty; // State
+      private int JIRADWKey = 0;
+      private DateTime issue_CreateDate = DateTime.UtcNow;
+
+      public int JIRA_DW_Key
+      {
+         get { return JIRADWKey; }
+         set { JIRADWKey = value; }
+      }
+
+      public DateTime Issue_Creation_Date
+      {
+         get { return issue_CreateDate; }
+         set { issue_CreateDate = value; }
+      }
 
       public int TotalTime
       {
@@ -64,8 +78,7 @@ namespace PullCycleTimes
          set
 
          {
-            int x;
-            if (Int32.TryParse(value, out x))
+            if (Int32.TryParse(value, out int x))
                totalTime = Int32.Parse(value);
             else
                totalTime = 0;
@@ -87,8 +100,10 @@ namespace PullCycleTimes
          }
       }
 
-      public TimeRecord(string IssueState, int TimeInMinutes)
+      public TimeRecord(int DWKey, DateTime createDate, string IssueState, int TimeInMinutes)
       {
+         JIRADWKey = DWKey;
+         issue_CreateDate = createDate;
          totalTime = TimeInMinutes;
          issueState = IssueState;
       }

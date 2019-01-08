@@ -66,6 +66,7 @@ SELECT  DISTINCT
 			THEN 'Added'
 			ELSE ''
 			END
+		, DJI.priority_desc
 FROM fact_jira_issue_sprint FJIS
 	INNER JOIN  fact_jira_issue FJI ON
 		FJI.jira_issue_dwkey = FJIS.jira_issue_dwkey 
